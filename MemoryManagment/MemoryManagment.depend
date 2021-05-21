@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1621580287 source:c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\main.cpp
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Parser.h>
+	<string>
+
+1621580326 c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\include\parser.h
+	<iostream>
+	<sstream>
+	<fstream>
+	<vector>
+
