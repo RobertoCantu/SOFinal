@@ -36,21 +36,43 @@ void Parser:: readFile (string fileName){
     ifstream myInputFile;
     myInputFile.open(fileName.data());
     if (myInputFile){
-            while (getline (myInputFile,str)){
+            while (getline (myInputFile,str )){
         vector <string> work;
+
+
+
+
+
         string temp= "";
         for (int i=0; i < str.size(); i++){
+
+
             if (str[i]== ' '){
+                    if (str[i+1] == ' '){
+                        //No hagas nada
+                    }
+
+                    else {
+
                 work.push_back(temp);
                 temp="";
+                    }
             }
             else {
                 temp.push_back(str[i]);
+
             }
 
         }
-        work.push_back(temp);
-        vecInstructions.push_back(work);
+
+if (temp==""){
+    //No metas nada al vector
+    }
+        else {
+            work.push_back(temp);
+        }
+
+       vecInstructions.push_back(work);
 
 }
 checker (vecInstructions);

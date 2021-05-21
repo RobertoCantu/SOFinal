@@ -14,8 +14,9 @@ vector <vector <string>> instructions;
 
 
 Parser parser ("Test.txt");
+
 instructions= parser.getParseInstructions();
-//cout << instructions.size();
+
 
 
 
@@ -23,10 +24,11 @@ instructions= parser.getParseInstructions();
 
 for (int i=0; i < instructions.size();i++){
     for (int j=0; j <instructions[i].size();j++){
-        cout << instructions[i][j];
+        cout << instructions[i][j] <<" ";
     }
     cout << "\n";
 }
+
 
 
 
