@@ -21,8 +21,8 @@ class Insturctions
         int current_time=0;
         int page_faults=0;
         int total_swaps=0;
-        const int MEM_SIZE= 2048;
-        const int SWAP_MEM_SIZE=4096;
+        int MEM_SIZE= 2048;
+         int SWAP_MEM_SIZE=4096;
         const int PAGE_SIZE=16;
         bool strategy= false;
 
