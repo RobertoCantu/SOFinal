@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1622834174 source:c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\main.cpp
+1622873735 source:c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\main.cpp
 	<iostream>
 	<fstream>
 	<sstream>
@@ -15,10 +15,11 @@
 	<fstream>
 	<vector>
 
-1622855881 c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\include\insturctions.h
+1622874998 c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\include\insturctions.h
 	<math.h>
 	"ProcPages.h"
 	"SwapPages.h"
+	<unordered_map>
 
 1622855930 c:\users\rober\documents\7 semestre\sistemas operativos\sofinal\memorymanagment\include\swappages.h
 

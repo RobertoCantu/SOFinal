@@ -2,6 +2,7 @@
 #include <math.h>
 #include "ProcPages.h"
 #include "SwapPages.h"
+#include <unordered_map>
 using namespace std;
 
 
@@ -18,13 +19,19 @@ class Insturctions
 
 
     private:
-        int current_time=0;
+
+        unordered_map <int,int> fifo;
+        unordered_map <int, int> timestamp;
+        int swa[4096] = {0};
+        int mp [127]= {0};
+        int m [2048]= {0};
         int page_faults=0;
-        int total_swaps=0;
-        int MEM_SIZE= 2048;
-         int SWAP_MEM_SIZE=4096;
-        const int PAGE_SIZE=16;
-        bool strategy= false;
+        int time_stamp=0;
+        int libre=128;
+        int swaps=0;
+        int num_pages=0;
+
+
 
 };
 
@@ -33,20 +40,24 @@ Insturctions::Insturctions(){
 
 }
 
+//Funcion para mostrar la direccion real, dada la direccion virtual
+
 void Insturctions::instA(int d , int p, int m){
 
 
 }
 
-void Insturctions::instP(int n, int p ){
-    cout << "Asignar " << n << "bytes al proceso " << p << endl;
+
+//Funcion para colocar un proceso
+void Insturctions::instP(int N, int p ){
+    cout << "Asignar " << N << "bytes al proceso " << p << endl;
     //Casos invalidos
-    if (n <=0){
+    if (N <=0){
         cout << "Error: el tamano del proceso debe ser mayor que cero " << "\n";
         cout << "Esta instruccion no podra ejecturase " << endl;
     }
 
-    if (n > 2048){
+    if (N > 2048){
         cout << "Error : el tamano del proceso excede los 2048 bytes" << "\n";
         cout << "Esta instruccion no podra ejecutarse" << endl;
     }
@@ -55,12 +66,72 @@ void Insturctions::instP(int n, int p ){
         cout << "Error : los id's tienes que ser igual o mayor que cero" << "\n";
     }
 
-//Calcula cuantas paginas se necesitan para cargar el proceso
-int num_of_pages= ceil(n/PAGE_SIZE);
+    num_pages= ceil(N/16.0);
+    timestamp.insert(make_pair(p,num_pages));
+    int n= N;
+
+    //Revisar si hay espacio libro en memoria real para poder colocar al proceso
+    if (libre >= num_pages){
+
+        libre-= num_pages;
+        for (int i=0; i < 128 ; i ++){
+
+            if (mp[i] == 0 && num_pages > 0){
+                mp[i]= p;
+                fifo.insert(make_pair(i,p));
+                num_pages--;
+
+            }
+        }
+
+        for (int j=0; j < 2048 ; j++){
+            if (m[j] == 0 && n>0){
+                m[j] = p;
+                n--;
+            }
+        }
+
+         int temp = -1, mayor = -1;
+    int iC = 0;
+    int iC2 = 0;
+    int j;
+    for(j=0; j<128; j++)
+    {
+      if(mp[j] == p)
+      {
+        if(iC==0)
+        {
+          temp = j;
+          iC++;
+        }
+        if(mp[j+1] != p)
+        {
+          if(iC2==0)
+          {
+            mayor = j;
+            iC2++;
+          }
+        }
+      }
+    }
+    cout << "Se asignaron los marcos de página " << temp << " - " << mayor << " al proceso " << p << endl;
+  }
 
 
 
+
+
+        else {
+            cout << "fifo";
+            //Hacer un swapping con el algoritmo de FIFO
+        }
 }
+
+
+
+
+
+
 
 void Insturctions::instL(int p){
 

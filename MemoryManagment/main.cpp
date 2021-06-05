@@ -22,8 +22,7 @@ int strtoInt (string instruction){
 int main()
 {
 
-SwapPages sw (5);
-cout << sw.getFrame();
+
 
 
 
@@ -32,8 +31,7 @@ vector <vector <string>> instructions;
 
 Parser parser ("ArchivoTrabajo.txt");
 
-//instructions= parser.getParseInstructions();
-//cout << instructions.size();
+
 
 
 
