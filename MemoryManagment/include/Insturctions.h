@@ -35,6 +35,7 @@ class Insturctions
 
 };
 
+
 //Default Constructor
 Insturctions::Insturctions(){
 
@@ -43,10 +44,34 @@ Insturctions::Insturctions(){
 //Funcion para mostrar la direccion real, dada la direccion virtual
 
 void Insturctions::instA(int d , int p, int m){
+    cout<<"A" << d << " " << p << " " << m << endl;
+    if(m == 0){
+        cout << "Obtener la direccion real correspondiente a la direccion virtual " << d << " del proceso " << p << endl;
+    }
 
+    if( m ==1 ){
+        cout << "Obtener la direccion real correspondiente a la direccion virtual " << d << " del proceso " << p << " y cambiar dicha direccion" << endl;
+        cout << "Se cambio la direccion " << d << " del proceso " << p << endl;
+    }
 
-}
+    int res = 0;
+    int contR = 0;
+    int contP = 0;
+    for(int i = 0; i< 128; i++){
+        for(int j = 0; j < 16; j++){
+            if(contP == d){
+                res = contR;
+            }
+            contR++;
+            if(mp[i] == p){
+                contP++;
+            }
+        }
+    }
 
+    cout << "Direccion virtual: " << D << " Direccion real: " << res << endl;
+    int num = timestamp[p];
+    timestamp[p] = num+1;
 
 //Funcion para colocar un proceso
 void Insturctions::instP(int N, int p ){
