@@ -20,6 +20,10 @@ class SwapPages
 
 };
 
+//Default Constructor
+SwapPages::SwapPages(){
+
+}
 //Constructor
 SwapPages::SwapPages(int f){
     frame=f;

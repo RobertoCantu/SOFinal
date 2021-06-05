@@ -2,9 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <Parser.h>
-#include <Insturctions.h>
+#include "Parser.h"
+#include "Insturctions.h"
 #include <string>
+#include "SwapPages.h"
 
 
 using namespace std;
@@ -21,6 +22,9 @@ int strtoInt (string instruction){
 int main()
 {
 
+SwapPages sw (5);
+cout << sw.getFrame();
+
 
 
 vector <vector <string>> instructions;
@@ -28,7 +32,10 @@ vector <vector <string>> instructions;
 
 Parser parser ("ArchivoTrabajo.txt");
 
-instructions= parser.getParseInstructions();
+//instructions= parser.getParseInstructions();
+//cout << instructions.size();
+
+
 
 
 

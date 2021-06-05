@@ -1,5 +1,4 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -11,7 +10,7 @@ class Parser
     public:
         Parser();
         Parser (string fileName );
-        virtual ~Parser();
+        //virtual ~Parser();
         vector <vector<string>>  getParseInstructions ();
 
 
@@ -24,6 +23,10 @@ class Parser
 
 };
 
+//Default constructor
+Parser::Parser(){
+
+}
 //Constructor
 Parser::Parser (string fileName){
 readFile (fileName);
@@ -173,4 +176,4 @@ return parseInstruction;
 
 
 
-#endif // PARSER_H
+

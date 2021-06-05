@@ -1,7 +1,7 @@
-#ifndef INSTURCTIONS_H
-#define INSTURCTIONS_H
+#pragma once
 #include <math.h>
-
+#include "ProcPages.h"
+#include "SwapPages.h"
 using namespace std;
 
 
@@ -9,7 +9,7 @@ class Insturctions
 {
     public:
         Insturctions();
-        virtual ~Insturctions();
+        //virtual ~Insturctions();
         void instA (int d, int p, int m );
         void instP (int n, int p);
         void instL (int p);
@@ -27,6 +27,11 @@ class Insturctions
         bool strategy= false;
 
 };
+
+//Default Constructor
+Insturctions::Insturctions(){
+
+}
 
 void Insturctions::instA(int d , int p, int m){
 
@@ -65,4 +70,3 @@ void Insturctions::instF(){
 
 
 }
-#endif // INSTURCTIONS_H
