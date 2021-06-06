@@ -28,6 +28,8 @@ class Insturctions
         int libre=128;
         int swaps=0;
         int num_pages=0;
+        int c = 0;
+        void FIFO(int n, int p);
 
 
 
@@ -37,6 +39,34 @@ class Insturctions
 //Default Constructor
 Insturctions::Insturctions(){
 
+}
+
+void Insturctions::FIFO(int numB, int proc){
+  int index=0;
+  int temp3=0;
+
+  c = ceil(numB/16.0);
+  //libre -= c;
+
+  for(int i=0;i<c;i++)
+  {
+    //Trae la última posición del mapa
+    unordered_map<int,int>::iterator lastElement;
+    for(auto it = fifo.begin(); it != fifo.end(); ++it)
+    {
+      lastElement = it;
+    }
+
+    //Swap
+    swa[i]=proc;
+    index = lastElement->first;
+    temp3 = mp[index];
+    mp[index]=swa[i];
+    swa[i]=temp3;
+    fifo.erase(index);
+    fifo.insert(make_pair(index,proc));
+    swaps+=2;
+  }
 }
 
 //Funcion para mostrar la direccion real, dada la direccion virtual
@@ -67,7 +97,7 @@ void Insturctions::instA(int d , int p, int m){
         }
     }
 
-    cout << "Direccion virtual: " << D << " Direccion real: " << res << endl;
+    cout << "Direccion virtual: " << d << " Direccion real: " << res << endl;
     int num = timestamp[p];
     timestamp[p] = num+1;
 }
@@ -118,15 +148,16 @@ void Insturctions::instP(int N, int p ){
          int temp = -1, mayor = -1;
     int iC = 0;
     int iC2 = 0;
-    int j;
+    int j = 0;
     for(j=0; j<128; j++)
     {
       if(mp[j] == p)
       {
         if(iC==0)
         {
-          temp = j;
+          temp = j; //temp == 127 iC == 128
           iC++;
+          cout<<"hola";
         }
         if(mp[j+1] != p)
         {
@@ -146,8 +177,8 @@ void Insturctions::instP(int N, int p ){
 
 
         else {
-            cout << "fifo";
-            //Hacer un swapping con el algoritmo de FIFO
+            cout << "fifo"<<endl;
+            FIFO(N, p);
         }
 }
 

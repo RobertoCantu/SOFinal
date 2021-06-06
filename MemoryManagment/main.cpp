@@ -5,11 +5,11 @@
 #include "Parser.h"
 #include "Insturctions.h"
 #include <string>
-#include "SwapPages.h"
+
 
 
 using namespace std;
-
+Insturctions instructionsObj;
 //Funcion que convierte de String a Int
 int strtoInt (string instruction){
     stringstream stringconverter (instruction);
@@ -25,13 +25,12 @@ int main()
 
 
 
-
 vector <vector <string>> instructions;
 
 
-Parser parser ("ArchivoTrabajo.txt");
+Parser parser ("test.txt");
 
-
+instructions = parser.getParseInstructions();
 
 
 
@@ -48,16 +47,24 @@ Opciones posibles
             C - all comments
             */
 
+/*for(int i = 0; i<instructions.size(); i++){
+    for(int j = 0; j<instructions[i].size(); j++){
+        cout<<instructions[i][j];
+    }
+}
+*/
 for (int i=0; i < instructions.size(); i++){
 
     if (instructions[i][0] == "A"){
 
         // functionA (strtoInt (instuctions [i][1], instuctions [i][2], instuctions [i][3])
 
-
+        instructionsObj.instA(strtoInt(instructions[i][1]), strtoInt(instructions[i][2]), strtoInt(instructions[i][3]));
         }
 
         else if (instructions[i][0] == "P"){
+
+        instructionsObj.instP(strtoInt(instructions[i][1]), strtoInt(instructions[i][2]));
         // Metodo para instuccion
         }
 
