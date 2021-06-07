@@ -1,3 +1,7 @@
+//Hugo Garza A01177091
+//Roberto Cantu A01196704
+//Daniel Pardo A00822263
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
