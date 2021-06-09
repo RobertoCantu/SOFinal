@@ -20,7 +20,7 @@ class Insturctions
 
     private:
 
-        unordered_map <int,int> fifo; //mapa para guardar marco de pagina y id
+        //unordered_map <int,int> fifo; //mapa para guardar marco de pagina y id
         unordered_map<int, pair<int, int> > lru; //mapa para guardar tiempo, id y marco de pagina
         unordered_map <int, double> timestamp; //mapa para guardar tiempo del proceso
         unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente 
@@ -46,7 +46,9 @@ class Insturctions
         vector<pair<int,int>> startTime; //Vector que almacena los tiempos de inicio de los procesos para poder caluclar el Turn around time
         int start=0; 
         int end=0;
-        vector<pair <int, pair <double,double>>> turn; ///Vector para poder calcularn el turn aorund time
+        unordered_map<int, pair <int, double >> turn ; ///mapa para poder calcularn el turn aorund time
+        unordered_map<int, int>  startStamp; //mapa para poder calulcar el turn de procesos que fueron liberados 
+        vector <pair <int, bool>> check; //Revisa si algun proceso ya fue liberado para no seguir agregando tiempo a su time stampo
 
 
 
@@ -64,6 +66,7 @@ void Insturctions::FIFO(int N, int p){
   
   vector <int> swappedPages;
   int pages = ceil(N/16.0);
+  turn.insert(make_pair(p,make_pair(pages,0)));
   //libre -= c;
 //Vector de paginas para memoria real por si aun queda espacio antes de hacer los swappings correspondientes 
 vector<int> procesPages;
@@ -193,6 +196,20 @@ void Insturctions::instA(int d , int p, int m){
     
     timestamp[p] = num + 0.1;
     //cout << "Tiempo en A: " << timestamp[p];
+    for (auto it=turn.begin(); it != turn.end(); ++it){
+      if (it->first == p){
+        it->second.second+= 0.1; 
+      }
+    }
+
+    //turn.push_back(make_pair(p,make_pair(start,end+0.1)));
+    /*
+    for (int i=0 ; i < turn.size(); i++){
+      if (turn[i].first == p){
+        turn[i].second.second+= 0.1;
+      }
+    }
+    */
     countA++;
 }
 
@@ -219,12 +236,24 @@ void Insturctions::instP(int N, int p, bool flag){
     }
 
     num_pages= ceil(N/16.0);
-    cout << "Pages: " << num_pages << endl;
+    //cout << "Pages: " << num_pages << endl;
     
     timestamp.insert(make_pair(p,num_pages)); //Almacena el tiempo que tarda un proceso en cargar por cada pagina
-    turn.push_back(make_pair(p,make_pair(start,end )));
-    start= start + num_pages;
-    cout << "Start" << start;
+    
+    
+    //turn.push_back(make_pair(p,make_pair(start,end )));
+    
+    //cout << "Start" << start;
+    startStamp.insert(make_pair(p,start));
+    
+
+    
+    
+
+    
+
+    //Truco
+  
 
 
     
@@ -235,6 +264,15 @@ void Insturctions::instP(int N, int p, bool flag){
 
     //Revisar si hay espacio libro en memoria real para poder colocar al proceso
     if (libre >= num_pages){
+      end =end + num_pages;
+    //int contaux=check.size();
+   
+    turn.insert(make_pair(p,make_pair(num_pages,0)));
+    start= start + num_pages;
+
+    //for (auto it = turn.begin(); it != turn.end(); ++it){
+      //it->second.second += end;
+    //}
 
         libre-= num_pages;
         for (int i=0; i < 128 ; i ++){
@@ -300,12 +338,19 @@ void Insturctions::instL(int p){
         cout<<"Ese proceso no existe"<<endl;
         return;
     }
+    
     cout << "Liberar los marcos de pagina ocupados por el proceso " << p << endl;
     double time = timestamp[p];
     //cout << "Time " << time ;
     double factor= 0.1 * timestamp[p];
+    //check.push_back(make_pair(p,true));
     
     timestamp[p]=time+ factor;
+    for (auto it=turn.begin(); it != turn.end(); ++it){
+      if (it->first == p){
+        it->second.second= 0.1 +it->second.second+ it->second.first + end; 
+      }
+    }
 
     framesReal(p, false);
     erase(p);
@@ -317,10 +362,33 @@ void Insturctions::instL(int p){
 void Insturctions::instF(){
     int contador = 0;
     double auxiliar = 0;
-    cout << "F " << endl;
-    for (int i=0; i < turn.size(); i ++){
-      cout << "ID: " <<turn[i].first << " " << "Start time " << turn[i].second.first << " " << "End Time " << turn[i].second.second << endl;
+
+    for (auto it = startStamp.begin(); it != startStamp.end(); ++it){
+
+      for (auto ite = turn.begin(); ite != turn.end(); ++ite){
+
+        if (it->first == ite->first){
+          cout << "Id del proceso: " << it->first << "||" << "Tiempo de llegada: " << it->second << "||" 
+          <<"Tiempo de terminacion " << ite->second.second << "||" << "Turn around time = " << ite->second.second - it->second << endl;
+        }
+
+    //cout << "ID" << it->first << " " << "Start Time " << " " << it->second << endl;
+      }
+
+
+
     }
+    
+    /*
+    for (auto it = turnfree.begin(); it != turnfree.end(); ++it){
+
+      cout << "ID: " << it->first <<" " << "End time: "<< it->second <<endl;
+    }
+    */
+
+    //for (int i=0; i < turn.size(); i ++){
+      //cout << "ID: " <<turn[i].first << " " << "Start time " << turn[i].second.first << " " << "End Time " << turn[i].second.second << endl;
+    //}
     /*
     for (int i=0 ; i < startTime.size(); i++){
       cout << "Id: " << startTime[i].first << "Time of start " << startTime[i].second << endl;
@@ -342,6 +410,8 @@ void Insturctions::instF(){
     swaps=0; // Resetea los swaps
     cout << "Page faults: " << page_faults << endl;
     page_faults=0; //Resetea las page faults
+    start=0;
+    end=0;
     
     }
 
@@ -463,7 +533,7 @@ void Insturctions::erase(int p){
     {
       libre++;
       mp[i]=0;
-      fifo.erase(i);
+      //fifo.erase(i);
     }
   }
 }
