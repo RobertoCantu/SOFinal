@@ -163,6 +163,13 @@ void Insturctions::instA(int d , int p, int m){
         cout << "Se cambio la direccion " << d << " del proceso " << p << endl;
     }
 
+    //Revisar si esta en memoria real o en la de swapping 
+    for (int i=0; i < 256; i ++){
+      if (swa[i] == p){
+        page_faults++;
+      }
+    }
+
     int res = 0;
     int contR = 0;
     int contP = 0;
@@ -309,11 +316,12 @@ void Insturctions::instF(){
         contador++;
         auxiliar+=it->second;
     }
-    cout << "Turnaround promedio: " << (auxiliar/(contador*1.0))-4 << endl;
+    cout << "Turnaround promedio: " << (auxiliar/(contador*1.0)) << endl;
     cout << "Swap In's y Swap Out's: " <<  swaps << endl;
     swaps=0; // Resetea los swaps
-    cout << "Page faults: " << '1' << endl;
-    //cout << "Tiempo de acceso o modificacion de direccion " << countA * 0.1 << 's' << endl;
+    cout << "Page faults: " << page_faults << endl;
+    page_faults=0; //Resetea las page faults
+    
     }
 
     else {
