@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <map>
 #include <unordered_map>
 #include <vector>
 using namespace std;
@@ -24,7 +25,7 @@ class Insturctions
         unordered_map <int, int> timestamp; //mapa para guardar tiempo del proceso
         unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente 
         //vector <int> globalframes; //Vector que ayuda  almacenar todos los frames 
-        int swa[256] = {0}; //Variable para representar memoria de swapping
+        int swa[255] = {0}; //Variable para representar memoria de swapping
         int mp [127]= {0}; //Variable para representar marcos de pagina
         int m [2048]= {0}; ///Variable para representar bytes de memoria real
         int page_faults=0; //Variable para contar los page faults
@@ -41,6 +42,8 @@ class Insturctions
         void erase(int p);
         bool existeProceso(int p);
         void imprimirvector(vector<int> vec);
+        vector <pair <int,int> > fifoq; //Para poder guardar las paginas conforme van llegando con su id 
+        
 
 
 
@@ -54,32 +57,65 @@ Insturctions::Insturctions(){
 }
 
 //Metodo con el algoritmo FIFO recibiendo como parametro numero de bytes (N) y id del proceso (pId)
-void Insturctions::FIFO(int N, int pId){
-  int index=0;
-  int temp3=0;
-
-  c = ceil(N/16.0);
+void Insturctions::FIFO(int N, int p){
+  
+  vector <int> swappedPages;
+  int pages = ceil(N/16.0);
   //libre -= c;
+//Vector de paginas para memoria real por si aun queda espacio antes de hacer los swappings correspondientes 
+vector<int> procesPages;
+  for (int i=0 ; i < 127; i ++){
+    if (mp[i] == 0){
+      m[i]=p;
+      procesPages.push_back(i);
+      pages --;
 
-  for(int i=0;i<c;i++)
-  {
-    //Trae la �ltima posici�n del mapa
+    }
+  }
+  //Revisar si en el vector existe algun elemento
+  
+   // frames.insert(make_pair(p,procesPages));
+    //Aqui empezamos a liberar memoria y ha llenar la memoria Swap como sea necesario 
+
+    /*
     unordered_map<int,int>::iterator iter;
     for(auto it = fifo.begin(); it != fifo.end(); ++it)
     {
       iter = it;
     }
+    */
+    //Copiar los marcos que se van a desocupar para el nuevo proceso en la memoria de swapping       
+  for (int j=0; j < 256; j ++){
+    //Aqui ocurre el swapping 
+    if (swa[j] == 0 && pages > 0){
+      int pos=0;
+      swa[j]=fifoq[j].second;
+      swaps ++;
+      pages--;
+      mp[fifoq[pos].first]= p;
+      procesPages.push_back(fifoq[pos].first);
+      swaps ++;
+      //Los mete de nuevo a la queue por si se llegan a requerir 
+      swappedPages.push_back(fifoq[pos].first);
+      fifoq.push_back(make_pair(fifoq[pos].first,fifoq[pos].second));
+      fifoq.erase(fifoq.begin());
+      pos++;
+    }
+    
 
-    //Swap
-    swa[i]=pId;
-    index = iter->first;
-    temp3 = mp[index];
-    mp[index]=swa[i];
-    swa[i]=temp3;
-    fifo.erase(index);
-    fifo.insert(make_pair(index,pId));
-    swaps++;
   }
+
+  //Mapear los nuevos frames con su process id 
+  frames.insert(make_pair(p,procesPages));
+
+  framesReal(p, true);
+
+  //Mostrar los frames que fueron swapeados hacia la memoria swap 
+  cout << "Los siguientes marcos de pagina fueron swappeados a memoria swap " << "[";
+  imprimirvector(swappedPages);
+  cout << "]";
+  cout << endl;
+  cout << endl;
 }
 
 //Metodo con el algortimo LRU recibiendo como parametros numero de bytes (N) y id del proceso (pId)
@@ -184,7 +220,8 @@ void Insturctions::instP(int N, int p, bool flag){
                 
                 //frames.insert(make_pair(p,globalframes.push_back(i)));
                 
-                fifo.insert(make_pair(i,p));
+                //fifo.insert(make_pair(i,p));
+                fifoq.push_back(make_pair(i,p));
                 lru.insert(make_pair(i,make_pair(p, num_pages)));
                 num_pages--;
 
@@ -213,13 +250,14 @@ void Insturctions::instP(int N, int p, bool flag){
 
 
 
-
+//Si ya no paginas disponibles tendra que aplicar uno de los siguientes algoritmos, segun lo que haya ingresado el 
+//usuario
         else {
             if(flag){
-                cout << "FIFO"<<endl;
+                cout << "No hay suficiente memoria se utilizara el algoritmo de FIFO"<<endl;
                 FIFO(N, p);
             }else{
-                cout<<"LRU"<<endl;
+                cout<<"No hay suficiente memoria se utilizara el algoritmo de LRU"<<endl;
                 LRU(N, p);
             }
         }
@@ -237,7 +275,7 @@ void Insturctions::instL(int p){
         cout<<"Ese proceso no existe"<<endl;
         return;
     }
-    cout << "Liberar los marcos de p�gina ocupados por el proceso " << p << endl;
+    cout << "Liberar los marcos de pagina ocupados por el proceso " << p << endl;
     int time = timestamp[p];
     timestamp[p]=time+1;
 
@@ -262,12 +300,14 @@ void Insturctions::instF(){
     cout << "Swaps general: " <<  swaps << endl;
     cout << "Page faults: " << '1' << endl;
     cout << "Tiempo de acceso o modificacion de direccion " << countA * 0.1 << 's' << endl;
+    cout << "Tamano de la queue en este punto " << fifo.size();
 
 }
 
 //funcion auxiliar para obtener marcos paginas 
 void Insturctions::framesReal(int p, bool flag){
   
+  /*
       int aux = -1;
       int last = -1;
       int pages = 0;
@@ -357,7 +397,7 @@ void Insturctions::framesSwa(int p){
         }
       }
         if(aux != -1){
-            cout << "Se liberan los marcos " << aux << " - " << last << " del �rea de swapping" << endl;
+            cout << "Se liberan los marcos " << aux << " - " << last << " del area de swapping" << endl;
         }
 
          for(int i=0;i<256;i++){
