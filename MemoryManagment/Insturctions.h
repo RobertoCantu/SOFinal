@@ -78,18 +78,7 @@ vector<int> procesPages;
 
     }
   }
-  //Revisar si en el vector existe algun elemento
-  
-   // frames.insert(make_pair(p,procesPages));
-    //Aqui empezamos a liberar memoria y ha llenar la memoria Swap como sea necesario 
 
-    /*
-    unordered_map<int,int>::iterator iter;
-    for(auto it = fifo.begin(); it != fifo.end(); ++it)
-    {
-      iter = it;
-    }
-    */
     //Copiar los marcos que se van a desocupar para el nuevo proceso en la memoria de swapping       
   for (int j=0; j < 256; j ++){
     //Aqui ocurre el swapping 
@@ -202,14 +191,7 @@ void Insturctions::instA(int d , int p, int m){
       }
     }
 
-    //turn.push_back(make_pair(p,make_pair(start,end+0.1)));
-    /*
-    for (int i=0 ; i < turn.size(); i++){
-      if (turn[i].first == p){
-        turn[i].second.second+= 0.1;
-      }
-    }
-    */
+
     countA++;
 }
 
@@ -247,18 +229,7 @@ void Insturctions::instP(int N, int p, bool flag){
     startStamp.insert(make_pair(p,start));
     
 
-    
-    
 
-    
-
-    //Truco
-  
-
-
-    
-    //startTime.push_back(make_pair(p,start));
-    //start= timestamp[p] + start ;
 
     int n= N;
 
@@ -376,13 +347,12 @@ if (end > 0){
           <<"Tiempo de terminacion " << ite->second.second << "||" << "Turn around time = " << ite->second.second - it->second << endl;
           contador ++;
           auxiliar+=ite->second.second - it->second;
-          //turn.erase(ite->first);
-          //startStamp.erase(it->first);
+          
         }
 
-    //cout << "ID" << it->first << " " << "Start Time " << " " << it->second << endl;
+   
       }
-      //startStamp.erase(it->first);
+     
 
 
 
@@ -395,8 +365,7 @@ if (end > 0){
     page_faults=0; //Resetea las page faults
     start=0;
     end=0;
-    //for (auto it = startStamp.begin(); it != startStamp.end(); ++it){
-  //startStamp.erase(it->first);
+  
 
 //}
 
@@ -409,93 +378,10 @@ else {
 }
 
 
- 
-
-
-
-//Erase startStamp map
-
-    
-    /*
-    for (auto it = turnfree.begin(); it != turnfree.end(); ++it){
-
-      cout << "ID: " << it->first <<" " << "End time: "<< it->second <<endl;
-    }
-    */
-
-    //for (int i=0; i < turn.size(); i ++){
-      //cout << "ID: " <<turn[i].first << " " << "Start time " << turn[i].second.first << " " << "End Time " << turn[i].second.second << endl;
-    //}
-    /*
-    for (int i=0 ; i < startTime.size(); i++){
-      cout << "Id: " << startTime[i].first << "Time of start " << startTime[i].second << endl;
-    }
-    */
-    /*
-
-    if ( timestamp.size()> 0){
-      cout << "Turnaround por proceso: " << endl;
-    for(auto it = timestamp.begin(); it != timestamp.end(); ++it)
-    {
-        cout << "Nombre del proceso: " << it->first << " Turnaround: " << it->second << endl;
-        timestamp.erase(it->first);
-        contador++;
-        auxiliar+=it->second;
-    }
-    cout << "Turnaround promedio: " << (auxiliar/(contador*1.0)) << endl;
-    cout << "Swap In's y Swap Out's: " <<  swaps << endl;
-    swaps=0; // Resetea los swaps
-    cout << "Page faults: " << page_faults << endl;
-    page_faults=0; //Resetea las page faults
-    start=0;
-    end=0;
-    
-    }
-
-    else {
-      cout << "No existen procesos en el programa para poder realizar los calculos " << endl;
-    }
-    */
-
 }
 
 //funcion auxiliar para obtener marcos paginas 
 void Insturctions::framesReal(int p, bool flag){
-  
-  /*
-      int aux = -1;
-      int last = -1;
-      int pages = 0;
-      int auxPage = 0;
-      for(int j = 0; j<128; j++){
-        if(mp[j] == p){
-        //cout<<"hola";
-          if(pages == 0){
-            aux = j;
-            pages++;
-          }
-          if(mp[j+1] != p){
-            if(auxPage == 0){
-              last = j;
-              auxPage++;
-            }
-          }
-        }
-      }
-
-      /*
-      cout << "Ojo aqui compa " << endl;
-      for (int i=0; i < 127; i++){
-        cout << mp[i] << " ";
-      }
-
-      cout << "--MAPA--" << endl;
-  for(auto it = frames.begin(); it != frames.end(); ++it)
-  {
-    cout << " " << "ID" << it->first << endl;
-    imprimirvector(it->second);
-  }
-  */
       if(flag){
         for(auto it = frames.begin(); it != frames.end(); ++it)
   {
@@ -508,8 +394,7 @@ void Insturctions::framesReal(int p, bool flag){
     
     }
   }
-        //cout << se asignaron los marcos de pagina << 
-       // cout << "Se asignaron los marcos de pagina " << aux << " - " << last << " al proceso " << p << endl;
+    
       }else{
         for(auto it = frames.begin(); it != frames.end(); ++it)
   {
@@ -524,8 +409,6 @@ void Insturctions::framesReal(int p, bool flag){
     
     }
   }
-        //cout << "Se liberaron los siguientes marcos de pagina" <<"[ ";
-        //cout << "Se liberan los marcos de p�gina de memoria real: " << aux << " - " << last << endl;
       }
     }
 
