@@ -363,6 +363,10 @@ void Insturctions::instF(){
     int contador = 0;
     double auxiliar = 0;
 
+    cout << "F" << endl;
+    
+
+if (end > 0){
     for (auto it = startStamp.begin(); it != startStamp.end(); ++it){
 
       for (auto ite = turn.begin(); ite != turn.end(); ++ite){
@@ -370,14 +374,47 @@ void Insturctions::instF(){
         if (it->first == ite->first){
           cout << "Id del proceso: " << it->first << "||" << "Tiempo de llegada: " << it->second << "||" 
           <<"Tiempo de terminacion " << ite->second.second << "||" << "Turn around time = " << ite->second.second - it->second << endl;
+          contador ++;
+          auxiliar+=ite->second.second - it->second;
+          //turn.erase(ite->first);
+          //startStamp.erase(it->first);
         }
 
     //cout << "ID" << it->first << " " << "Start Time " << " " << it->second << endl;
       }
+      //startStamp.erase(it->first);
 
 
 
     }
+
+    cout << "Turnaround Promedio: " << auxiliar/contador << endl;
+    cout << "Swap In's y Swap Out's: " <<  swaps << endl;
+    swaps=0; // Resetea los swaps
+    cout << "Page faults: " << page_faults << endl;
+    page_faults=0; //Resetea las page faults
+    start=0;
+    end=0;
+    //for (auto it = startStamp.begin(); it != startStamp.end(); ++it){
+  //startStamp.erase(it->first);
+
+//}
+
+
+}
+
+else {
+
+  cout << "No existen procesos en el programa para poder realizar los calculos " << endl;
+}
+
+
+ 
+
+
+
+//Erase startStamp map
+
     
     /*
     for (auto it = turnfree.begin(); it != turnfree.end(); ++it){
@@ -394,7 +431,7 @@ void Insturctions::instF(){
       cout << "Id: " << startTime[i].first << "Time of start " << startTime[i].second << endl;
     }
     */
-    
+    /*
 
     if ( timestamp.size()> 0){
       cout << "Turnaround por proceso: " << endl;
@@ -418,6 +455,7 @@ void Insturctions::instF(){
     else {
       cout << "No existen procesos en el programa para poder realizar los calculos " << endl;
     }
+    */
 
 }
 
