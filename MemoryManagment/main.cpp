@@ -83,7 +83,7 @@ for (int i=0; i < instructions.size(); i++){
         }
 
         else if (instructions[i][0] == "E"){
-            cout<<"Se termino el programa, ponga un 100 profe"<<endl;
+            cout<<"Se termino el programa "<<endl;
             return 0;
         }
 

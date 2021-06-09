@@ -22,7 +22,7 @@ class Insturctions
 
         unordered_map <int,int> fifo; //mapa para guardar marco de pagina y id
         unordered_map<int, pair<int, int> > lru; //mapa para guardar tiempo, id y marco de pagina
-        unordered_map <int, int> timestamp; //mapa para guardar tiempo del proceso
+        unordered_map <int, double> timestamp; //mapa para guardar tiempo del proceso
         unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente 
         //vector <int> globalframes; //Vector que ayuda  almacenar todos los frames 
         int swa[255] = {0}; //Variable para representar memoria de swapping
@@ -177,8 +177,8 @@ void Insturctions::instA(int d , int p, int m){
     }
 
     cout << "Direccion virtual: " << d << " Direccion real: " << res << endl;
-    int num = timestamp[p];
-    timestamp[p] = num + 1;
+    double num = timestamp[p];
+    timestamp[p] = num + 0.1;
     countA++;
 }
 
@@ -205,6 +205,7 @@ void Insturctions::instP(int N, int p, bool flag){
     }
 
     num_pages= ceil(N/16.0);
+    
     timestamp.insert(make_pair(p,num_pages));
     int n= N;
 
@@ -276,8 +277,10 @@ void Insturctions::instL(int p){
         return;
     }
     cout << "Liberar los marcos de pagina ocupados por el proceso " << p << endl;
-    int time = timestamp[p];
-    timestamp[p]=time+1;
+    double time = timestamp[p];
+    //cout << "Time " << time ;
+    double factor= 0.1 * timestamp[p];
+    timestamp[p]=time+ factor;
 
     framesReal(p, false);
     erase(p);
@@ -299,8 +302,8 @@ void Insturctions::instF(){
     cout << "Turnaround promedio: " << (auxiliar/(contador*1.0))-4 << endl;
     cout << "Swaps general: " <<  swaps << endl;
     cout << "Page faults: " << '1' << endl;
-    cout << "Tiempo de acceso o modificacion de direccion " << countA * 0.1 << 's' << endl;
-    cout << "Tamano de la queue en este punto " << fifo.size();
+    //cout << "Tiempo de acceso o modificacion de direccion " << countA * 0.1 << 's' << endl;
+    
 
 }
 
