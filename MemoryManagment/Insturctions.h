@@ -31,7 +31,7 @@ class Insturctions
         int page_faults=0; //Variable para contar los page faults
         int time_stamp=0; //Variable para contar el tiempo
         int libre=128; //Variable para representar las paginas de la memoria
-        int swaps=0; //Variable para contar los page swaps
+        int swaps=0; //Variable para contar los page swap in y swap outs
         int num_pages=0; //Variable para contar numeros de paginas de cada proceso
         int c = 0;
         int countA = 0;
@@ -64,7 +64,7 @@ void Insturctions::FIFO(int N, int p){
   //libre -= c;
 //Vector de paginas para memoria real por si aun queda espacio antes de hacer los swappings correspondientes 
 vector<int> procesPages;
-  for (int i=0 ; i < 127; i ++){
+  for (int i=0 ; i < 128; i ++){
     if (mp[i] == 0){
       m[i]=p;
       procesPages.push_back(i);
@@ -89,7 +89,7 @@ vector<int> procesPages;
     //Aqui ocurre el swapping 
     if (swa[j] == 0 && pages > 0){
       int pos=0;
-      swa[j]=fifoq[j].second;
+      swa[j]=fifoq[pos].second;
       swaps ++;
       pages--;
       mp[fifoq[pos].first]= p;
@@ -97,8 +97,10 @@ vector<int> procesPages;
       swaps ++;
       //Los mete de nuevo a la queue por si se llegan a requerir 
       swappedPages.push_back(fifoq[pos].first);
+      frames.erase(fifoq[pos].second);
       fifoq.push_back(make_pair(fifoq[pos].first,fifoq[pos].second));
       fifoq.erase(fifoq.begin());
+      
       pos++;
     }
     
@@ -178,7 +180,9 @@ void Insturctions::instA(int d , int p, int m){
 
     cout << "Direccion virtual: " << d << " Direccion real: " << res << endl;
     double num = timestamp[p];
+    
     timestamp[p] = num + 0.1;
+    //cout << "Tiempo en A: " << timestamp[p];
     countA++;
 }
 
@@ -280,6 +284,7 @@ void Insturctions::instL(int p){
     double time = timestamp[p];
     //cout << "Time " << time ;
     double factor= 0.1 * timestamp[p];
+    
     timestamp[p]=time+ factor;
 
     framesReal(p, false);
@@ -291,19 +296,29 @@ void Insturctions::instL(int p){
 //Funcion para imprimir reporte de resultados
 void Insturctions::instF(){
     int contador = 0;
-    int auxiliar = 0;
-    cout << "Turnaround por proceso: " << endl;
+    double auxiliar = 0;
+    cout << "F " << endl;
+    
+
+    if ( timestamp.size()> 0){
+      cout << "Turnaround por proceso: " << endl;
     for(auto it = timestamp.begin(); it != timestamp.end(); ++it)
     {
         cout << "Nombre del proceso: " << it->first << " Turnaround: " << it->second << endl;
+        timestamp.erase(it->first);
         contador++;
         auxiliar+=it->second;
     }
     cout << "Turnaround promedio: " << (auxiliar/(contador*1.0))-4 << endl;
-    cout << "Swaps general: " <<  swaps << endl;
+    cout << "Swap In's y Swap Out's: " <<  swaps << endl;
+    swaps=0; // Resetea los swaps
     cout << "Page faults: " << '1' << endl;
     //cout << "Tiempo de acceso o modificacion de direccion " << countA * 0.1 << 's' << endl;
-    
+    }
+
+    else {
+      cout << "No existen procesos en el programa para poder realizar los calculos " << endl;
+    }
 
 }
 
@@ -386,7 +401,7 @@ void Insturctions::framesSwa(int p){
       int auxPage = 0;
       for(int j = 0; j<256; j++){
         if(swa[j] == p){
-        //cout<<"hola";
+        
           if(pages == 0){
             aux = j;
             pages++;
@@ -400,7 +415,7 @@ void Insturctions::framesSwa(int p){
         }
       }
         if(aux != -1){
-            cout << "Se liberan los marcos " << aux << " - " << last << " del area de swapping" << endl;
+            cout << "Se liberaron los marcos " << aux << " - " << last << " del area de swapping" << endl;
         }
 
          for(int i=0;i<256;i++){
@@ -413,7 +428,7 @@ void Insturctions::framesSwa(int p){
 
 //Funcion para borrar marcos de pagina de un proceso
 void Insturctions::erase(int p){
-    for(int i=0;i<127;i++)
+    for(int i=0;i<128;i++)
   {
     if(mp[i]==p)
     {
@@ -426,14 +441,32 @@ void Insturctions::erase(int p){
 
 //Funcion que revisa si existe un proceso en memoria real
 bool Insturctions::existeProceso(int p){
-    for(int i = 0, cont = 0; i<127; i++){
+
+  int contReal=0;
+  int contSwap=0;
+
+
+    for(int i = 0; i<128; i++){
         if(mp[i] != p){
-            cont++;
-        }else{
-            return true;
+            contReal++;
         }
     }
-    return false;
+    for (int i=0; i < 256; i ++){
+      if (swa[i] != p){
+        contSwap++;
+      }
+
+    }
+
+    if (contReal == 128 && contSwap == 256){
+      return false;
+    }
+
+    else {
+      return true; 
+    }
+
+
 }
 
 void Insturctions::imprimirvector (vector<int> vec)  {
