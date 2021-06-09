@@ -1,6 +1,7 @@
 #pragma once
 #include <math.h>
 #include <unordered_map>
+#include <vector>
 using namespace std;
 
 
@@ -21,6 +22,8 @@ class Insturctions
         unordered_map <int,int> fifo; //mapa para guardar marco de pagina y id
         unordered_map<int, pair<int, int> > lru; //mapa para guardar tiempo, id y marco de pagina
         unordered_map <int, int> timestamp; //mapa para guardar tiempo del proceso
+        unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente 
+        //vector <int> globalframes; //Vector que ayuda  almacenar todos los frames 
         int swa[256] = {0}; //Variable para representar memoria de swapping
         int mp [127]= {0}; //Variable para representar marcos de pagina
         int m [2048]= {0}; ///Variable para representar bytes de memoria real
@@ -37,6 +40,8 @@ class Insturctions
         void framesSwa(int p);
         void erase(int p);
         bool existeProceso(int p);
+        void imprimirvector(vector<int> vec);
+
 
 
 };
@@ -58,7 +63,7 @@ void Insturctions::FIFO(int N, int pId){
 
   for(int i=0;i<c;i++)
   {
-    //Trae la última posición del mapa
+    //Trae la ï¿½ltima posiciï¿½n del mapa
     unordered_map<int,int>::iterator iter;
     for(auto it = fifo.begin(); it != fifo.end(); ++it)
     {
@@ -82,7 +87,7 @@ void Insturctions::LRU(int N, int pId){
 
   c = ceil(N/16.0);
   int intMax = 2147483647;
-    //Trae la última posición del mapa
+    //Trae la ï¿½ltima posiciï¿½n del mapa
     unordered_map<int,pair<int, int> >::iterator iter;
     for(auto it = lru.begin(); it != lru.end(); ++it)
     {
@@ -172,15 +177,28 @@ void Insturctions::instP(int N, int p, bool flag){
 
         libre-= num_pages;
         for (int i=0; i < 128 ; i ++){
+          
 
             if (mp[i] == 0 && num_pages > 0){
                 mp[i]= p;
+                
+                //frames.insert(make_pair(p,globalframes.push_back(i)));
+                
                 fifo.insert(make_pair(i,p));
                 lru.insert(make_pair(i,make_pair(p, num_pages)));
                 num_pages--;
 
             }
         }
+        //Agregar frames de proceso en un mapa para futuras referencias
+        vector<int> procesPages;
+        for (int i=0; i < 128; i ++){
+          if(mp[i] == p){
+            procesPages.push_back(i);
+            //frames.insert(make_pair(p,procesPages.push_back(i));
+          }
+        }
+        frames.insert(make_pair(p,procesPages));
 
         for (int j=0; j < 2048 ; j++){
             if (m[j] == 0 && n>0){
@@ -219,7 +237,7 @@ void Insturctions::instL(int p){
         cout<<"Ese proceso no existe"<<endl;
         return;
     }
-    cout << "Liberar los marcos de página ocupados por el proceso " << p << endl;
+    cout << "Liberar los marcos de pï¿½gina ocupados por el proceso " << p << endl;
     int time = timestamp[p];
     timestamp[p]=time+1;
 
@@ -249,6 +267,7 @@ void Insturctions::instF(){
 
 //funcion auxiliar para obtener marcos paginas 
 void Insturctions::framesReal(int p, bool flag){
+  
       int aux = -1;
       int last = -1;
       int pages = 0;
@@ -268,10 +287,50 @@ void Insturctions::framesReal(int p, bool flag){
           }
         }
       }
+
+      /*
+      cout << "Ojo aqui compa " << endl;
+      for (int i=0; i < 127; i++){
+        cout << mp[i] << " ";
+      }
+
+      cout << "--MAPA--" << endl;
+  for(auto it = frames.begin(); it != frames.end(); ++it)
+  {
+    cout << " " << "ID" << it->first << endl;
+    imprimirvector(it->second);
+  }
+  */
       if(flag){
-        cout << "Se asignaron los marcos de pagina " << aux << " - " << last << " al proceso " << p << endl;
+        for(auto it = frames.begin(); it != frames.end(); ++it)
+  {
+    if (it->first == p){
+
+    cout << "Se asignaron los siguientes marcos de pagina " << "[ ";
+    imprimirvector(it->second);
+    cout << "]";
+    cout << endl;
+    
+    }
+  }
+        //cout << se asignaron los marcos de pagina << 
+       // cout << "Se asignaron los marcos de pagina " << aux << " - " << last << " al proceso " << p << endl;
       }else{
-        cout << "Se liberan los marcos de página de memoria real: " << aux << " - " << last << endl;
+        for(auto it = frames.begin(); it != frames.end(); ++it)
+  {
+    if (it->first == p){
+
+    cout << "Se liberaron los siguientes marcos de pagina" << "[ ";
+    imprimirvector(it->second);
+    cout << "]";
+    cout << endl;
+    frames.erase(it->first);
+
+    
+    }
+  }
+        //cout << "Se liberaron los siguientes marcos de pagina" <<"[ ";
+        //cout << "Se liberan los marcos de pï¿½gina de memoria real: " << aux << " - " << last << endl;
       }
     }
 
@@ -298,7 +357,7 @@ void Insturctions::framesSwa(int p){
         }
       }
         if(aux != -1){
-            cout << "Se liberan los marcos " << aux << " - " << last << " del área de swapping" << endl;
+            cout << "Se liberan los marcos " << aux << " - " << last << " del ï¿½rea de swapping" << endl;
         }
 
          for(int i=0;i<256;i++){
@@ -332,4 +391,11 @@ bool Insturctions::existeProceso(int p){
         }
     }
     return false;
+}
+
+void Insturctions::imprimirvector (vector<int> vec)  {
+  for (int i=0; i < vec.size(); i ++){
+    cout << vec[i] << " ";
+  }
+  
 }
