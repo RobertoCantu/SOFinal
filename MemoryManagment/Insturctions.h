@@ -43,7 +43,8 @@ class Insturctions
         bool existeProceso(int p);
         void imprimirvector(vector<int> vec);
         vector <pair <int,int> > fifoq; //Para poder guardar las paginas conforme van llegando con su id 
-        
+        vector<pair<int,int>> startTime; //Vector que almacena los tiempos de inicio de los procesos para poder caluclar el Turn around time
+        int start=0; 
 
 
 
@@ -217,7 +218,11 @@ void Insturctions::instP(int N, int p, bool flag){
 
     num_pages= ceil(N/16.0);
     
-    timestamp.insert(make_pair(p,num_pages));
+    timestamp.insert(make_pair(p,num_pages)); //Almacena el tiempo que tarda un proceso en cargar por cada pagina 
+    
+    //startTime.push_back(make_pair(p,start));
+    //start= timestamp[p] + start ;
+
     int n= N;
 
     //Revisar si hay espacio libro en memoria real para poder colocar al proceso
@@ -305,6 +310,11 @@ void Insturctions::instF(){
     int contador = 0;
     double auxiliar = 0;
     cout << "F " << endl;
+    /*
+    for (int i=0 ; i < startTime.size(); i++){
+      cout << "Id: " << startTime[i].first << "Time of start " << startTime[i].second << endl;
+    }
+    */
     
 
     if ( timestamp.size()> 0){
