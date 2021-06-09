@@ -45,6 +45,8 @@ class Insturctions
         vector <pair <int,int> > fifoq; //Para poder guardar las paginas conforme van llegando con su id 
         vector<pair<int,int>> startTime; //Vector que almacena los tiempos de inicio de los procesos para poder caluclar el Turn around time
         int start=0; 
+        int end=0;
+        vector<pair <int, pair <double,double>>> turn; ///Vector para poder calcularn el turn aorund time
 
 
 
@@ -217,8 +219,14 @@ void Insturctions::instP(int N, int p, bool flag){
     }
 
     num_pages= ceil(N/16.0);
+    cout << "Pages: " << num_pages << endl;
     
-    timestamp.insert(make_pair(p,num_pages)); //Almacena el tiempo que tarda un proceso en cargar por cada pagina 
+    timestamp.insert(make_pair(p,num_pages)); //Almacena el tiempo que tarda un proceso en cargar por cada pagina
+    turn.push_back(make_pair(p,make_pair(start,end )));
+    start= start + num_pages;
+    cout << "Start" << start;
+
+
     
     //startTime.push_back(make_pair(p,start));
     //start= timestamp[p] + start ;
@@ -310,6 +318,9 @@ void Insturctions::instF(){
     int contador = 0;
     double auxiliar = 0;
     cout << "F " << endl;
+    for (int i=0; i < turn.size(); i ++){
+      cout << "ID: " <<turn[i].first << " " << "Start time " << turn[i].second.first << " " << "End Time " << turn[i].second.second << endl;
+    }
     /*
     for (int i=0 ; i < startTime.size(); i++){
       cout << "Id: " << startTime[i].first << "Time of start " << startTime[i].second << endl;
@@ -493,3 +504,4 @@ void Insturctions::imprimirvector (vector<int> vec)  {
   }
   
 }
+
