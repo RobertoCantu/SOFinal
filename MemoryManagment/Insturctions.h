@@ -20,11 +20,6 @@ class Insturctions
 
     private:
 
-        //unordered_map <int,int> fifo; //mapa para guardar marco de pagina y id
-        unordered_map<int, pair<int, int> > lru; //mapa para guardar tiempo, id y marco de pagina
-        unordered_map <int, double> timestamp; //mapa para guardar tiempo del proceso
-        unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente 
-        //vector <int> globalframes; //Vector que ayuda  almacenar todos los frames 
         int swa[255] = {0}; //Variable para representar memoria de swapping
         int mp [127]= {0}; //Variable para representar marcos de pagina
         int m [2048]= {0}; ///Variable para representar bytes de memoria real
@@ -33,8 +28,6 @@ class Insturctions
         int libre=128; //Variable para representar las paginas de la memoria
         int swaps=0; //Variable para contar los page swap in y swap outs
         int num_pages=0; //Variable para contar numeros de paginas de cada proceso
-        int c = 0;
-        int countA = 0;
         void FIFO(int n, int p);
         void LRU(int n, int p);
         void framesReal(int p, bool flag);
@@ -42,13 +35,14 @@ class Insturctions
         void erase(int p);
         bool existeProceso(int p);
         void imprimirvector(vector<int> vec);
-        vector <pair <int,int> > fifoq; //Para poder guardar las paginas conforme van llegando con su id 
+        vector <pair <int,int> > fifoq; //Para poder guardar las paginas conforme van llegando con su id
+        vector <pair <int,int> > lruq; 
         vector<pair<int,int>> startTime; //Vector que almacena los tiempos de inicio de los procesos para poder caluclar el Turn around time
         int start=0; 
         int end=0;
         unordered_map<int, pair <int, double >> turn ; ///mapa para poder calcularn el turn aorund time
-        unordered_map<int, int>  startStamp; //mapa para poder calulcar el turn de procesos que fueron liberados 
-        vector <pair <int, bool>> check; //Revisa si algun proceso ya fue liberado para no seguir agregando tiempo a su time stampo
+        unordered_map<int, int>  startStamp; //mapa para poder calulcar el turn de procesos que fueron liberados
+        unordered_map<int, vector<int>> frames; // mapa que almacena los frames correctamente  
 
 
 
@@ -116,29 +110,42 @@ vector<int> procesPages;
 }
 
 //Metodo con el algortimo LRU recibiendo como parametros numero de bytes (N) y id del proceso (pId)
-void Insturctions::LRU(int N, int pId){
+void Insturctions::LRU(int N, int p){
 
-  c = ceil(N/16.0);
-  int intMax = 2147483647;
-    //Trae la �ltima posici�n del mapa
-    unordered_map<int,pair<int, int> >::iterator iter;
-    for(auto it = lru.begin(); it != lru.end(); ++it)
-    {
-      if(it->second.second < intMax)
-      {
-        iter = it;
-        intMax = it->second.second;
-      }
+
+  vector <int> swappedPages;
+  int pages = ceil(N/16.0);
+  turn.insert(make_pair(p,make_pair(pages,0)));
+  //Vector de paginas para memoria real por si aun queda espacio antes de hacer los swappings correspondientes 
+  vector<int> procesPages;
+  for (int i=0 ; i < 128; i ++){
+    if (mp[i] == 0){
+      m[i]=p;
+      procesPages.push_back(i);
+      pages --;
+
     }
-   
-    //Swap
+  }
 
-    swa[iter->first] = iter->second.first;
-    mp[iter->first] = pId;
-    //cout<<iter->first;
-    lru.erase(iter->first);
-    lru.insert(make_pair(iter->first, make_pair(pId, intMax)));
-    swaps++;
+  for (int j=0; j < 256; j ++){
+    //Aqui ocurre el swapping 
+    if (swa[j] == 0 && pages > 0){
+      int pos=0;
+      swa[j]=lruq[pos].second;
+      swaps ++;
+      pages--;
+      mp[lruq[pos].first]= p;
+      procesPages.push_back(lruq[pos].first);
+      swaps ++;
+      //Los mete de nuevo a la queue por si se llegan a requerir 
+      swappedPages.push_back(lruq[pos].first);
+      frames.erase(lruq[pos].second);
+      lruq.push_back(make_pair(lruq[pos].first,lruq[pos].second));
+      lruq.erase(lruq.begin());
+      
+      pos++;
+    }
+  }
 }
 
 //Funcion para mostrar la direccion real, dada la direccion virtual
@@ -157,6 +164,19 @@ void Insturctions::instA(int d , int p, int m){
         cout << "Obtener la direccion real correspondiente a la direccion virtual " << d << " del proceso " << p << " y cambiar dicha direccion" << endl;
         cout << "Se cambio la direccion " << d << " del proceso " << p << endl;
     }
+
+    int aux;
+    int cont = 0;
+    for(int i = 0; i<128; i++){
+      if(lruq[i].second == p){
+        cont++;
+        aux = lruq[i].first;
+        lruq.push_back(make_pair(aux, p));
+      }
+    }
+
+      lruq.erase(lruq.begin(), lruq.begin()+cont);
+    
 
     //Revisar si esta en memoria real o en la de swapping 
     for (int i=0; i < 256; i ++){
@@ -181,10 +201,6 @@ void Insturctions::instA(int d , int p, int m){
     }
 
     cout << "Direccion virtual: " << d << " Direccion real: " << res << endl;
-    double num = timestamp[p];
-    
-    timestamp[p] = num + 0.1;
-    //cout << "Tiempo en A: " << timestamp[p];
     for (auto it=turn.begin(); it != turn.end(); ++it){
       if (it->first == p){
         it->second.second+= 0.1; 
@@ -192,7 +208,6 @@ void Insturctions::instA(int d , int p, int m){
     }
 
 
-    countA++;
 }
 
 //Funcion para colocar un proceso 
@@ -217,33 +232,18 @@ void Insturctions::instP(int N, int p, bool flag){
         return;
     }
 
+
     num_pages= ceil(N/16.0);
-    //cout << "Pages: " << num_pages << endl;
-    
-    timestamp.insert(make_pair(p,num_pages)); //Almacena el tiempo que tarda un proceso en cargar por cada pagina
-    
-    
-    //turn.push_back(make_pair(p,make_pair(start,end )));
-    
-    //cout << "Start" << start;
     startStamp.insert(make_pair(p,start));
     
-
-
-
     int n= N;
 
     //Revisar si hay espacio libro en memoria real para poder colocar al proceso
     if (libre >= num_pages){
       end =end + num_pages;
-    //int contaux=check.size();
    
     turn.insert(make_pair(p,make_pair(num_pages,0)));
     start= start + num_pages;
-
-    //for (auto it = turn.begin(); it != turn.end(); ++it){
-      //it->second.second += end;
-    //}
 
         libre-= num_pages;
         for (int i=0; i < 128 ; i ++){
@@ -256,7 +256,7 @@ void Insturctions::instP(int N, int p, bool flag){
                 
                 //fifo.insert(make_pair(i,p));
                 fifoq.push_back(make_pair(i,p));
-                lru.insert(make_pair(i,make_pair(p, num_pages)));
+                lruq.push_back(make_pair(i,p));
                 num_pages--;
 
             }
@@ -266,7 +266,6 @@ void Insturctions::instP(int N, int p, bool flag){
         for (int i=0; i < 128; i ++){
           if(mp[i] == p){
             procesPages.push_back(i);
-            //frames.insert(make_pair(p,procesPages.push_back(i));
           }
         }
         frames.insert(make_pair(p,procesPages));
@@ -311,12 +310,6 @@ void Insturctions::instL(int p){
     }
     
     cout << "Liberar los marcos de pagina ocupados por el proceso " << p << endl;
-    double time = timestamp[p];
-    //cout << "Time " << time ;
-    double factor= 0.1 * timestamp[p];
-    //check.push_back(make_pair(p,true));
-    
-    timestamp[p]=time+ factor;
     for (auto it=turn.begin(); it != turn.end(); ++it){
       if (it->first == p){
         it->second.second= 0.1 +it->second.second+ it->second.first + end; 
@@ -346,19 +339,12 @@ if (end > 0){
           cout << "Id del proceso: " << it->first << "||" << "Tiempo de llegada: " << it->second << "||" 
           <<"Tiempo de terminacion " << ite->second.second << "||" << "Turn around time = " << ite->second.second - it->second << endl;
           contador ++;
-          auxiliar+=ite->second.second - it->second;
-          
-        }
-
-   
+          auxiliar+=ite->second.second - it->second;          
+        }  
       }
-     
-
-
-
     }
 
-    cout << "Turnaround Promedio: " << auxiliar/contador << endl;
+    cout << "Turnaround Promedio: " << (auxiliar/contador) << endl;
     cout << "Swap In's y Swap Out's: " <<  swaps << endl;
     swaps=0; // Resetea los swaps
     cout << "Page faults: " << page_faults << endl;
@@ -366,10 +352,6 @@ if (end > 0){
     start=0;
     end=0;
   
-
-//}
-
-
 }
 
 else {
@@ -377,40 +359,32 @@ else {
   cout << "No existen procesos en el programa para poder realizar los calculos " << endl;
 }
 
-
 }
 
 //funcion auxiliar para obtener marcos paginas 
 void Insturctions::framesReal(int p, bool flag){
       if(flag){
-        for(auto it = frames.begin(); it != frames.end(); ++it)
-  {
-    if (it->first == p){
+        for(auto it = frames.begin(); it != frames.end(); ++it){
+          if (it->first == p){
 
-    cout << "Se asignaron los siguientes marcos de pagina " << "[ ";
-    imprimirvector(it->second);
-    cout << "]";
-    cout << endl;
-    
-    }
-  }
-    
+            cout << "Se asignaron los siguientes marcos de pagina " << "[ ";
+            imprimirvector(it->second);
+            cout << "]";
+            cout << endl;
+          }
+        }
       }else{
-        for(auto it = frames.begin(); it != frames.end(); ++it)
-  {
-    if (it->first == p){
-
-    cout << "Se liberaron los siguientes marcos de pagina" << "[ ";
-    imprimirvector(it->second);
-    cout << "]";
-    cout << endl;
-    frames.erase(it->first);
-
-    
-    }
-  }
+        for(auto it = frames.begin(); it != frames.end(); ++it){
+          if (it->first == p){
+            cout << "Se liberaron los siguientes marcos de pagina" << "[ ";
+            imprimirvector(it->second);
+            cout << "]";
+            cout << endl;
+            frames.erase(it->first);
+          }
+        }
       }
-    }
+}
 
 
 //funcion auxiliar para obtener marcos paginas de la memoria swap
@@ -443,18 +417,14 @@ void Insturctions::framesSwa(int p){
                 swa[i]=0;
             }
         }
-
     }
 
 //Funcion para borrar marcos de pagina de un proceso
 void Insturctions::erase(int p){
-    for(int i=0;i<128;i++)
-  {
-    if(mp[i]==p)
-    {
+    for(int i=0;i<128;i++){
+    if(mp[i]==p){
       libre++;
       mp[i]=0;
-      //fifo.erase(i);
     }
   }
 }
@@ -464,7 +434,6 @@ bool Insturctions::existeProceso(int p){
 
   int contReal=0;
   int contSwap=0;
-
 
     for(int i = 0; i<128; i++){
         if(mp[i] != p){
@@ -493,6 +462,5 @@ void Insturctions::imprimirvector (vector<int> vec)  {
   for (int i=0; i < vec.size(); i ++){
     cout << vec[i] << " ";
   }
-  
 }
 
